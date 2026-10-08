@@ -37,18 +37,6 @@ jobs:
       - name: Check AWS Identity
         run: aws sts get-caller-identity
 
-      - name: Check Terraform Directory
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: |
-          echo "Current directory:"
-          pwd
-
-          echo "Files:"
-          ls -la
-
-          echo "Terraform files:"
-          find . -maxdepth 2 -type f -name "*.tf"
-
       - name: Terraform Format
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform fmt -check -recursive
@@ -63,9 +51,18 @@ jobs:
 
       - name: Terraform Plan
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform plan -input=false
+        run: |
+          terraform plan \
+            -input=false \
+            -var='spoke_account_id=${{ secrets.SPOKE_ACCOUNT_ID }}' \
+            -var='subnets=${{ secrets.SUBNETS }}'
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform apply -auto-approve -input=false   
+        run: |
+          terraform apply \
+            -auto-approve \
+            -input=false \
+            -var='spoke_account_id=${{ secrets.SPOKE_ACCOUNT_ID }}' \
+            -var='subnets=${{ secrets.SUBNETS }}'    
