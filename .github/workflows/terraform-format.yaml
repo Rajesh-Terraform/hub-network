@@ -8,7 +8,7 @@ on:
 permissions:
   id-token: write
   contents: read
-  
+
 env:
   AWS_REGION: ap-south-1
 
@@ -28,8 +28,8 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume:  arn:aws:iam::647132523867:role/github-actions-test-role  
-          aws-region: ap-south-1   
+          role-to-assume: arn:aws:iam::647132523867:role/github-actions-test-role
+          aws-region: ap-south-1
 
       - name: Check AWS Identity
         run: aws sts get-caller-identity
@@ -44,8 +44,7 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan -input=false
-
+        run: terraform plan -input=false 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false            
+        run: terraform apply -auto-approve -input=false
