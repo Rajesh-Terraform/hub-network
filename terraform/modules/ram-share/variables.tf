@@ -1,16 +1,25 @@
 variable "name" {
-  description = "RAM share name"
+  description = "RAM resource share name"
+  type        = string
+}
+
+variable "resource_arn" {
+  description = "Resource ARN to share"
+  type        = string
+}
+
+variable "principal" {
+  description = "AWS account, organization, or OU to share with"
   type        = string
 }
 
 variable "allow_external_principals" {
-  description = "Allow sharing with principals outside the AWS organization"
+  description = "Whether to allow sharing outside the AWS Organization"
   type        = bool
-  default     = false
 }
 
 variable "tags" {
-  description = "Tags for RAM resources"
+  description = "Common tags"
   type        = map(string)
   default     = {}
 }  
