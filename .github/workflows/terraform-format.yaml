@@ -22,50 +22,88 @@ jobs:
 
     steps:
 
+      # --------------------------------
+      # 1. Checkout
+      # --------------------------------
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # --------------------------------
+      # 2. Install Terraform
+      # --------------------------------
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      # --------------------------------
+      # 3. AWS OIDC Authentication
+      # --------------------------------
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::647132523867:role/github-actions-test-role
           aws-region: ap-south-1 
 
+      # --------------------------------
+      # 4. Verify AWS
+      # --------------------------------
       - name: Check AWS Identity
-        run: aws sts get-caller-identity
+        run: |
+          aws sts get-caller-identity
 
+      # --------------------------------
+      # 5. Create Terraform Variables
+      # --------------------------------
       - name: Create Terraform Variables
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
           cat > terraform.auto.tfvars <<EOF
           spoke_account_id = "${{ secrets.SPOKE_ACCOUNT_ID }}"
 
-          subnets = [
-            "10.1.0.0/24",
-            "10.1.1.0/24"
-          ]
+          subnets = {
+            private_1 = {
+              cidr_block = "10.1.0.0/24"
+              az         = "ap-south-1a"
+            }
+
+            private_2 = {
+              cidr_block = "10.1.1.0/24"
+              az         = "ap-south-1b"
+            }
+          }
           EOF
 
+      # --------------------------------
+      # 6. Terraform Format
+      # --------------------------------
       - name: Terraform Format
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform fmt -check -recursive
 
+      # --------------------------------
+      # 7. Terraform Init
+      # --------------------------------
       - name: Terraform Init
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init -input=false
 
+      # --------------------------------
+      # 8. Terraform Validate
+      # --------------------------------
       - name: Terraform Validate
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform validate
 
+      # --------------------------------
+      # 9. Terraform Plan
+      # --------------------------------
       - name: Terraform Plan
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform plan -input=false
 
+      # --------------------------------
+      # 10. Terraform Apply
+      # --------------------------------
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform apply -auto-approve -input=false  
+        run: terraform apply -auto-approve -input=false 
