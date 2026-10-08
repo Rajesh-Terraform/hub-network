@@ -56,9 +56,6 @@ jobs:
       - name: Create Terraform Variables
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
-          cat > terraform.auto.tfvars <<EOF
-          spoke_account_id = "${{ secrets.SPOKE_ACCOUNT_ID }}"
-
           subnets = {
             private_1 = {
               cidr_block = "10.1.0.0/24"
