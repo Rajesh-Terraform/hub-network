@@ -1,0 +1,15 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+terraform.tfvars
+!terraform.tfvars.example
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+/Phase1-hub-vpc1/
+/phase3-Transit-Gateway--cross-account-share/
+/Phase-7-Expose-it-publicly/  
