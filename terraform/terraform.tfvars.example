@@ -1,18 +1,11 @@
-vpc_cidr = "10.1.0.0/16"
-
 subnets = {
   private_1 = {
-    cidr_block        = "10.1.0.0/24"
-    availability_zone = "ap-south-1a"
-    public            = false
+    cidr_block = "10.1.0.0/24"
+    az         = "ap-south-1a"
   }
 
   private_2 = {
-    cidr_block        = "10.1.1.0/24"
-    availability_zone = "ap-south-1b"
-    public            = false
+    cidr_block = "10.1.1.0/24"
+    az         = "ap-south-1b"
   }
-}
-
-# AWS Spoke Account ID
-principal = "YOUR_SPOKE_ACCOUNT_ID"  
+}  
