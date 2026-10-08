@@ -1,8 +1,10 @@
 resource "aws_ram_resource_share" "this" {
   name                      = var.name
-  allow_external_principals = var.allow_external_principals
+  allow_external_principals = false
 
-  tags = var.tags
+  tags = {
+    Name = var.name
+  }
 }
 
 resource "aws_ram_resource_association" "this" {

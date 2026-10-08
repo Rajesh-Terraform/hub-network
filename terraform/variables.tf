@@ -64,4 +64,9 @@ variable "tags" {
   description = "Common tags applied to hub resources"
   type        = map(string)
   default     = {}
-}  
+}
+
+variable "spoke_account_id" {
+  description = "AWS account ID of the spoke account"
+  type        = string
+} 
