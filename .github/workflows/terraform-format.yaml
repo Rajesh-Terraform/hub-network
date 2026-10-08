@@ -28,7 +28,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::647132523867:role/github-actions-terraform-role-v1 
+          role-to-assume:  arn:aws:iam::647132523867:role/github-actions-test-role  
           aws-region: ap-south-1   
 
       - name: Check AWS Identity
@@ -48,4 +48,4 @@ jobs:
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false          
+        run: terraform apply -auto-approve -input=false            
