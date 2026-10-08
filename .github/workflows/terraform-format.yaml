@@ -37,6 +37,18 @@ jobs:
       - name: Check AWS Identity
         run: aws sts get-caller-identity
 
+      - name: Create Terraform Variables
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          cat > terraform.auto.tfvars <<EOF
+          spoke_account_id = "${{ secrets.SPOKE_ACCOUNT_ID }}"
+
+          subnets = [
+            "10.1.0.0/24",
+            "10.1.1.0/24"
+          ]
+          EOF
+
       - name: Terraform Format
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform fmt -check -recursive
@@ -51,9 +63,9 @@ jobs:
 
       - name: Terraform Plan
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform plan -input=false -var-file="terraform.tfvars"
+        run: terraform plan -input=false
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform apply -auto-approve -input=false -var-file="terraform.tfvars" 
+        run: terraform apply -auto-approve -input=false  
