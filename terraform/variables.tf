@@ -66,7 +66,4 @@ variable "tags" {
   default     = {}
 }
 
-variable "spoke_account_id" {
-  description = "AWS account ID of the spoke account"
-  type        = string
-} 
+ 
