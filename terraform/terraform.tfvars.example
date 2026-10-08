@@ -1,9 +1,13 @@
-aws_region          = "ap-south-1"
-hub_vpc_name        = "hub-network"
-hub_vpc_cidr        = "10.0.0.0/16"
-spoke_account_id    = "111122223333"
+aws_region       = "ap-south-1"
+hub_vpc_name     = "hub-network"
+hub_vpc_cidr     = "10.0.0.0/16"
+
+# CHANGE THIS to your actual SPOKE AWS account ID
+spoke_account_id = "YOUR_SPOKE_ACCOUNT_ID"
+
 spoke_vpc_cidr      = "10.1.0.0/16"
 spoke_attachment_id = ""
+
 allow_external_ram_principals = true
 
 subnets = {
@@ -12,16 +16,19 @@ subnets = {
     availability_zone = "ap-south-1a"
     public            = true
   }
+
   public_b = {
     cidr_block        = "10.0.1.0/24"
     availability_zone = "ap-south-1b"
     public            = true
   }
+
   private_a = {
     cidr_block        = "10.0.10.0/24"
     availability_zone = "ap-south-1a"
     public            = false
   }
+
   private_b = {
     cidr_block        = "10.0.11.0/24"
     availability_zone = "ap-south-1b"
@@ -33,4 +40,4 @@ tags = {
   Environment = "dev"
   ManagedBy   = "Terraform"
   Network     = "hub"
-}  
+}   
