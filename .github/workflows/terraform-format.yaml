@@ -35,23 +35,34 @@ jobs:
       - name: Check AWS Identity
         run: aws sts get-caller-identity
 
+      - name: Check Terraform Directory
+        run: |
+          echo "Current directory:"
+          pwd
+
+          echo "Repository files:"
+          ls -la
+
+          echo "Terraform directory:"
+          ls -la ${{ env.TF_WORKING_DIR }}
+
       - name: Terraform Format
-        working-directory: terraform
+        working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform fmt -check -recursive
 
       - name: Terraform Init
-        working-directory: terraform
+        working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init -input=false
 
       - name: Terraform Validate
-        working-directory: terraform
+        working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform validate
 
       - name: Terraform Plan
-        working-directory: terraform
+        working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform plan -input=false
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        working-directory: terraform
+        working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform apply -auto-approve -input=false   
