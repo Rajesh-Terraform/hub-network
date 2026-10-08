@@ -59,10 +59,5 @@ jobs:
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: |
-          terraform apply \
-            -auto-approve \
-            -input=false \
-            -var='spoke_account_id=${{ secrets.SPOKE_ACCOUNT_ID }}' \
-            -var='subnets=${{ secrets.SUBNETS }}'    
+        working-directory: terraform
+        run: terraform apply -auto-approve -input=false -var-file="terraform.tfvars" 
