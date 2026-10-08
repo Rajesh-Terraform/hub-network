@@ -1,3 +1,4 @@
+
 name: Terraform AWS CI-CD
 
 on:
@@ -29,7 +30,7 @@ jobs:
         uses: actions/checkout@v4
 
       # --------------------------------
-      # 2. Install Terraform
+      # 2. Setup Terraform
       # --------------------------------
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -41,66 +42,73 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::647132523867:role/github-actions-test-role
-          aws-region: ap-south-1 
+          aws-region:  ap-south-1
 
       # --------------------------------
-      # 4. Verify AWS
+      # 4. Verify AWS Authentication
       # --------------------------------
       - name: Check AWS Identity
         run: |
           aws sts get-caller-identity
 
       # --------------------------------
-      # 5. Create Terraform Variables
-      # --------------------------------
-      - name: Create Terraform Variables
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: |
-          subnets = {
-            private_1 = {
-              cidr_block = "10.1.0.0/24"
-              az         = "ap-south-1a"
-            }
-
-            private_2 = {
-              cidr_block = "10.1.1.0/24"
-              az         = "ap-south-1b"
-            }
-          }
-          EOF
-
-      # --------------------------------
-      # 6. Terraform Format
+      # 5. Terraform Format
       # --------------------------------
       - name: Terraform Format
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform fmt -check -recursive
 
       # --------------------------------
-      # 7. Terraform Init
+      # 6. Terraform Init
       # --------------------------------
       - name: Terraform Init
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init -input=false
 
       # --------------------------------
-      # 8. Terraform Validate
+      # 7. Terraform Validate
       # --------------------------------
       - name: Terraform Validate
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform validate
 
       # --------------------------------
-      # 9. Terraform Plan
+      # 8. Terraform Plan
       # --------------------------------
       - name: Terraform Plan
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform plan -input=false
+        env:
+          TF_VAR_subnets: |
+            {
+              "private_1": {
+                "cidr_block": "10.1.0.0/24",
+                "az": "ap-south-1a"
+              },
+              "private_2": {
+                "cidr_block": "10.1.1.0/24",
+                "az": "ap-south-1b"
+              }
+            }
+        run: |
+          terraform plan -input=false
 
       # --------------------------------
-      # 10. Terraform Apply
+      # 9. Terraform Apply
       # --------------------------------
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform apply -auto-approve -input=false 
+        env:
+          TF_VAR_subnets: |
+            {
+              "private_1": {
+                "cidr_block": "10.1.0.0/24",
+                "az": "ap-south-1a"
+              },
+              "private_2": {
+                "cidr_block": "10.1.1.0/24",
+                "az": "ap-south-1b"
+              }
+            }
+        run: |
+          terraform apply -auto-approve -input=false  
