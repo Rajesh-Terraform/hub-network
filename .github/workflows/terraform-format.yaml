@@ -15,7 +15,7 @@ env:
   AWS_REGION: ap-south-1
   TF_WORKING_DIR: terraform
 
-  TF_VAR_spoke_account_id: ${{ secrets.SPOKE_ACCOUNT_ID }}  
+  TF_VAR_spoke_account_id: "434097521299"
 
   TF_VAR_subnets: |
     {
