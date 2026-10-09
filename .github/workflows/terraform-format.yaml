@@ -2,7 +2,7 @@ name: Terraform AWS CI-CD
 
 on:
   push:
-    branches:
+    branches:  
       - main
 
   workflow_dispatch:
@@ -15,7 +15,7 @@ env:
   AWS_REGION: ap-south-1
   TF_WORKING_DIR: terraform
 
-  TF_VAR_spoke_account_id: ${{ secrets.SPOKE_ACCOUNT_ID }}
+  TF_VAR_spoke_account_id: ${{ secrets.SPOKE_ACCOUNT_ID }}  
 
   TF_VAR_subnets: |
     {
@@ -48,7 +48,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::647132523867:role/github-actions-test-role
-          aws-region: ap-south-1
+          aws-region: ap-south-1        
 
       - name: Terraform Init
         working-directory: ${{ env.TF_WORKING_DIR }}
@@ -56,7 +56,7 @@ jobs:
 
       - name: Terraform Validate
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform validate
+        run: terraform validate   
 
       - name: Terraform Plan
         working-directory: ${{ env.TF_WORKING_DIR }}
@@ -64,4 +64,4 @@ jobs:
 
       - name: Terraform Apply
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform apply -input=false -auto-approve      
+        run: terraform apply -input=false -auto-approve             

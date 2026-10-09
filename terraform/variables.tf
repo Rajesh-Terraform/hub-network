@@ -64,6 +64,6 @@ variable "tags" {
   description = "Common tags applied to hub resources"
   type        = map(string)
   default     = {}
-}
+}  
 
  

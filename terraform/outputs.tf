@@ -41,4 +41,4 @@ output "hub_attachment_id" {
 output "transit_gateway_route_table_id" {
   description = "Hub Transit Gateway route table ID"
   value       = module.transit_gateway.route_table_id
-}  
+}    
