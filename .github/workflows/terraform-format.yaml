@@ -16,6 +16,7 @@ env:
   TF_WORKING_DIR: terraform
 
   TF_VAR_spoke_account_id: "434097521299"
+  TF_VAR_allow_external_ram_principals: "true"
 
   TF_VAR_subnets: |
     {
