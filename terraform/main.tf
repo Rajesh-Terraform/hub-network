@@ -34,7 +34,7 @@ module "ram_share" {
 module "hub_spoke_routes" {
   source = "./modules/vpc-tgw-routes"
 
-  route_table_ids    = module.hub_vpc.private_route_table_ids
+  route_table_ids    = module.hub_vpc.private_route_table_ids_by_subnet
   destination_cidr   = var.spoke_vpc_cidr
   transit_gateway_id = module.transit_gateway.transit_gateway_id
 }  

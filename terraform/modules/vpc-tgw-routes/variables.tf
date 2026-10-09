@@ -1,6 +1,6 @@
 variable "route_table_ids" {
-  description = "VPC route table IDs to update"
-  type        = list(string)
+  description = "VPC route table IDs to update, keyed by stable subnet name"
+  type        = map(string)
 }
 
 variable "destination_cidr" {

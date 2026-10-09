@@ -33,7 +33,12 @@ output "private_route_table_ids" {
   value       = [for key in sort(keys(local.private_subnets)) : aws_route_table.this[key].id]
 }
 
+output "private_route_table_ids_by_subnet" {
+  description = "Private route table IDs keyed by subnet name"
+  value       = { for key in sort(keys(local.private_subnets)) : key => aws_route_table.this[key].id }
+}
+
 output "nat_gateway_ids" {
   description = "NAT Gateway IDs"
   value       = [for key in sort(keys(aws_nat_gateway.this)) : aws_nat_gateway.this[key].id]
-} 
+}

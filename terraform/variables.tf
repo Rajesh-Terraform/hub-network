@@ -40,6 +40,11 @@ variable "transit_gateway_asn" {
 variable "spoke_account_id" {
   description = "AWS account ID of the spoke allowed to use the Transit Gateway"
   type        = string
+
+  validation {
+    condition     = can(regex("^[0-9]{12}$", var.spoke_account_id))
+    error_message = "Set spoke_account_id to the 12-digit AWS account ID of the spoke account (for GitHub Actions, configure the SPOKE_ACCOUNT_ID secret)."
+  }
 }
 
 variable "spoke_vpc_cidr" {
@@ -64,6 +69,6 @@ variable "tags" {
   description = "Common tags applied to hub resources"
   type        = map(string)
   default     = {}
-}  
+}
 
  
