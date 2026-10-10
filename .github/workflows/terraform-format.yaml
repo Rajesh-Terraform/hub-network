@@ -80,4 +80,4 @@ jobs:
 
       - name: Keep apply disabled until state is reconciled
         if: github.ref == 'refs/heads/main' && vars.TF_APPLY_ENABLED != 'true'
-        run: echo "Terraform apply skipped. Import existing AWS resources into the S3 backend state before enabling TF_APPLY_ENABLED."
+        run: echo "Terraform apply skipped. Import existing AWS resources into the S3 backend state before enabling TF_APPLY_ENABLED."   

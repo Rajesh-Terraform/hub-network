@@ -13,4 +13,4 @@ resource "aws_ram_resource_association" "this" {
 resource "aws_ram_principal_association" "this" {
   resource_share_arn = aws_ram_resource_share.this.arn
   principal          = var.principal  
-}             
+}               

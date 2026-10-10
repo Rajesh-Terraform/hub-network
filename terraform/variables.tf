@@ -16,7 +16,7 @@ variable "hub_vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
-variable "subnets" {
+variable "subnets" {  
   description = "Hub subnet definitions keyed by a stable subnet name"
   type = map(object({
     cidr_block        = string
