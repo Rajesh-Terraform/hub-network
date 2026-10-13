@@ -13,7 +13,7 @@ This repository has one Terraform root at its top level. Modules are organized b
 2. The Terraform state is stored in the `hubstatefile/terraform.tfstate` key in the `dhoni-demo-terraform-bucket-123456` S3 bucket in `ap-south-1`. The bucket must exist, have versioning enabled, and allow the GitHub Actions role to list the bucket and read/write the state and `.tflock` objects.
 3. Run `terraform init` and `terraform plan` from this directory.
 4. If AWS resources were created by an earlier run without remote state, import those resources into this backend before applying. A fresh remote state does not know about resources created by a previous GitHub Actions runner.
-5. After the state is reconciled, set the GitHub Actions repository variable `TF_APPLY_ENABLED` to `true` to allow the workflow to apply on pushes to `main`. Until then, the workflow plans but skips apply.
+5. The GitHub Actions workflow validates and plans changes on pushes to `main` and manual runs. After reviewing the plan and reconciling state, set the repository variable `TF_APPLY_ENABLED` to `true` to allow apply runs from `main`; otherwise, apply is skipped. The workflow uses the hub account role `arn:aws:iam::647132523867:role/github-actions-test-role`.
 6. Provide `transit_gateway_id` and `ram_resource_share_arn` from `terraform output` to the spoke root.
 7. After the spoke applies and returns `spoke_transit_gateway_attachment_id`, set `spoke_attachment_id` in this root and apply again. This associates the spoke attachment with the hub TGW route table and adds the spoke CIDR route.
 

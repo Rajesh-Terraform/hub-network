@@ -1,24 +1,24 @@
-name: Terraform AWS Destroy
+name: Hub Terraform
 
 on:
   push:
     branches:
-      - main  
-
+      - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
-  id-token: write
   contents: read
 
 env:
   AWS_REGION: ap-south-1
   TF_WORKING_DIR: terraform
-
+  TF_VERSION: 1.13.4
   TF_VAR_spoke_account_id: "434097521299"
   TF_VAR_allow_external_ram_principals: "true"
-
-  TF_VAR_subnets: |
+  TF_VAR_subnets: >-
     {
       "private_1": {
         "cidr_block": "10.0.0.0/24",
@@ -43,58 +43,124 @@ env:
     }
 
 jobs:
-  terraform-destroy:
-    name: Terraform Destroy
+  validate:
+    name: Format and validate
     runs-on: ubuntu-latest
-
     defaults:
       run:
-        working-directory: ${{ env.TF_WORKING_DIR }}
-
+        working-directory: terraform
     steps:
-
-      # 1. Checkout repository
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Setup Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
 
-      # 3. Configure AWS using GitHub OIDC
-      - name: Configure AWS Credentials
+      - name: Check Terraform formatting
+        run: terraform fmt -check -recursive
+
+      - name: Initialize Terraform without backend
+        run: terraform init -backend=false -input=false
+
+      - name: Validate Terraform
+        run: terraform validate
+
+  plan:
+    name: Plan in hub account
+    needs: validate
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS credentials in hub account
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::647132523867:role/github-actions-test-role
           aws-region: ${{ env.AWS_REGION }}
 
-      # 4. Check AWS account
-      - name: Check AWS Identity
+      - name: Verify AWS account
         run: |
-          ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
-          echo "AWS Account: $ACCOUNT_ID"
-
-          if [ "$ACCOUNT_ID" != "647132523867" ]; then
-            echo "ERROR: Wrong AWS account!"
+          account_id="$(aws sts get-caller-identity --query Account --output text)"
+          if [ "$account_id" != "647132523867" ]; then
+            echo "::error::Expected hub account 647132523867, got $account_id"
             exit 1
           fi
 
-      # 5. Terraform Init
-      - name: Terraform Init
+      - name: Initialize Terraform
         run: terraform init -input=false
 
-      # 6. Terraform Format Check
-      - name: Terraform Format 
-        run: terraform fmt 
+      - name: Plan Terraform changes
+        run: terraform plan -input=false -out=tfplan
 
-      # 7. Terraform Validate
-      - name: Terraform Validate
-        run: terraform validate
+      - name: Upload Terraform plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: hub-terraform-plan
+          path: terraform/tfplan
+          retention-days: 5
 
-      # 8. Show resources that will be destroyed
-      - name: Terraform Destroy Plan
-        run: terraform plan -destroy -input=false
+  apply:
+    name: Apply in hub account
+    needs: plan
+    if: github.ref == 'refs/heads/main' && vars.TF_APPLY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      # 9. Destroy all Terraform resources
-      - name: Terraform Destroy
-        run: terraform destroy -input=false -auto-approve   
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS credentials in hub account
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::647132523867:role/github-actions-test-role
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Verify AWS account
+        run: |
+          account_id="$(aws sts get-caller-identity --query Account --output text)"
+          if [ "$account_id" != "647132523867" ]; then
+            echo "::error::Expected hub account 647132523867, got $account_id"
+            exit 1
+          fi
+
+      - name: Initialize Terraform
+        run: terraform init -input=false
+
+      - name: Download Terraform plan
+        uses: actions/download-artifact@v4
+        with:
+          name: hub-terraform-plan
+          path: terraform
+
+      - name: Apply Terraform plan
+        run: terraform apply -input=false -auto-approve tfplan
+
+      - name: Show Transit Gateway outputs
+        run: |
+          terraform output transit_gateway_id
+          terraform output ram_resource_share_arn   
