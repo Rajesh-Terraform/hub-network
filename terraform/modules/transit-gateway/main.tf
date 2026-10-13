@@ -58,4 +58,4 @@ resource "aws_ec2_transit_gateway_route" "spoke" {
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.this.id
 
   depends_on = [aws_ec2_transit_gateway_route_table_association.spoke]
-}  
+}    

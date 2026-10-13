@@ -1,9 +1,9 @@
-name: Terraform AWS Destroy
+name: Terraform AWS CI-CD
 
 on:
   push:
     branches:
-      - main  
+      - main
 
   workflow_dispatch:
 
@@ -43,13 +43,13 @@ env:
     }
 
 jobs:
-  terraform-destroy:
-    name: Terraform Destroy
+  terraform:
+    name: Terraform
     runs-on: ubuntu-latest
 
     defaults:
       run:
-        working-directory: ${{ env.TF_WORKING_DIR }}
+        working-directory: ${{ env.TF_WORKING_DIR }}      
 
     steps:
 
@@ -57,7 +57,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Setup Terraform
+      # 2. Install Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
@@ -68,33 +68,29 @@ jobs:
           role-to-assume: arn:aws:iam::647132523867:role/github-actions-test-role
           aws-region: ${{ env.AWS_REGION }}
 
-      # 4. Check AWS account
+      # 4. Check AWS identity
       - name: Check AWS Identity
-        run: |
-          ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
-          echo "AWS Account: $ACCOUNT_ID"
-
-          if [ "$ACCOUNT_ID" != "647132523867" ]; then
-            echo "ERROR: Wrong AWS account!"
-            exit 1
-          fi
+        run: aws sts get-caller-identity
 
       # 5. Terraform Init
       - name: Terraform Init
         run: terraform init -input=false
 
       # 6. Terraform Format Check
-      - name: Terraform Format 
+      - name: Terraform Format
         run: terraform fmt 
 
       # 7. Terraform Validate
       - name: Terraform Validate
         run: terraform validate
 
-      # 8. Show resources that will be destroyed
-      - name: Terraform Destroy Plan
-        run: terraform plan -destroy -input=false
+      # 8. Terraform Plan
+      - name: Terraform Plan
+        run: terraform plan -input=false
 
-      # 9. Destroy all Terraform resources
-      - name: Terraform Destroy
-        run: terraform destroy -input=false -auto-approve    
+      # 9. Terraform Apply
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        run: terraform apply -input=false -auto-approve    
+
+        
