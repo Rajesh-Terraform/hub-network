@@ -1,6 +1,8 @@
 # hub-network
 
-This repository has one Terraform root at its top level. Modules are organized by infrastructure responsibility:
+The main network Terraform root is in `terraform/`; Phase 5's temporary hub
+EC2 instance is a separate root in `phase5-ec2/`. Modules in the main
+root are organized by infrastructure responsibility:
 
 - `modules/vpc`: hub VPC, public/private subnets, internet gateway, per-AZ NAT gateways, route tables, and subnet associations.
 - `modules/transit-gateway`: hub TGW, hub VPC attachment, dedicated TGW route table, and spoke route/association after the spoke attachment exists.
@@ -16,6 +18,8 @@ This repository has one Terraform root at its top level. Modules are organized b
 5. The GitHub Actions workflow validates and plans changes on pushes to `main` and manual runs. After reviewing the plan and reconciling state, set the repository variable `TF_APPLY_ENABLED` to `true` to allow apply runs from `main`; otherwise, apply is skipped. The workflow uses the hub account role `arn:aws:iam::647132523867:role/github-actions-test-role`.
 6. Provide `transit_gateway_id` and `ram_resource_share_arn` from `terraform output` to the spoke root.
 7. After the spoke applies and returns `spoke_transit_gateway_attachment_id`, set `spoke_attachment_id` in this root and apply again. This associates the spoke attachment with the hub TGW route table and adds the spoke CIDR route.
+8. To create or remove the Phase 5 hub instance independently, manually run
+   **Phase 5 - Hub EC2** from Actions on `main`; see `phase5-ec2/README.md`.
 
 The hub creates one NAT Gateway for each private subnet, which has ongoing AWS charges. Keep `allow_external_ram_principals` false for accounts in the same AWS Organization; enable it only when sharing across Organizations requires it.
 

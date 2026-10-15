@@ -1,0 +1,102 @@
+name: Phase 5 - Hub EC2
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: "Create or remove the private hub EC2 instance"
+        required: true
+        type: choice
+        options:
+          - apply
+          - destroy
+      hub_vpc_id:
+        description: "Deployed hub VPC ID"
+        required: true
+        type: string
+      hub_private_subnet_id:
+        description: "Private subnet ID in the hub VPC"
+        required: true
+        type: string
+      confirm_destroy:
+        description: 'For destroy only, enter DESTROY exactly'
+        required: false
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ap-south-1
+  TF_VERSION: 1.13.4
+  TF_VAR_hub_vpc_id: ${{ inputs.hub_vpc_id }}
+  TF_VAR_hub_private_subnet_id: ${{ inputs.hub_private_subnet_id }}
+
+jobs:
+  phase5-hub-ec2:
+    name: ${{ inputs.operation }} hub EC2
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: phase5-ec2
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure hub AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::647132523867:role/github-actions-test-role
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Verify AWS account
+        run: |
+          account_id=$(aws sts get-caller-identity --query Account --output text)
+          if [[ "$account_id" != "647132523867" ]]; then
+            echo "ERROR: Connected to unexpected AWS account: $account_id"
+            exit 1
+          fi
+
+      - name: Initialize Terraform
+        run: terraform init -input=false
+
+      - name: Validate Terraform
+        run: terraform validate
+
+      - name: Create plan
+        if: inputs.operation == 'apply'
+        run: terraform plan -input=false -out=phase5.tfplan
+
+      - name: Apply plan
+        if: inputs.operation == 'apply'
+        run: terraform apply -input=false -auto-approve phase5.tfplan
+
+      - name: Show instance details
+        if: inputs.operation == 'apply'
+        run: |
+          echo "Hub instance ID: $(terraform output -raw instance_id)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Hub private IP: $(terraform output -raw instance_private_ip)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Confirm destroy request
+        if: inputs.operation == 'destroy'
+        env:
+          CONFIRM_DESTROY: ${{ inputs.confirm_destroy }}
+        run: |
+          if [[ "$CONFIRM_DESTROY" != "DESTROY" ]]; then
+            echo "ERROR: Enter DESTROY to remove the Phase 5 hub EC2 instance."
+            exit 1
+          fi
+
+      - name: Destroy hub EC2
+        if: inputs.operation == 'destroy'
+        run: terraform destroy -input=false -auto-approve    
