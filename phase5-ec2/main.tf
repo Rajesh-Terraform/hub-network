@@ -84,3 +84,4 @@ resource "aws_instance" "this" {
     Name = "phase5-hub-ec2"
   })
 }
+   
