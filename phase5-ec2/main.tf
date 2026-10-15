@@ -53,7 +53,7 @@ resource "aws_security_group" "instance" {
   vpc_id      = var.hub_vpc_id
 
   egress {
-    description = "Allow outbound traffic through the subnet's existing routes"
+    description = "Allow outbound traffic through the subnet existing routes"
     protocol    = "-1"
     from_port   = 0
     to_port     = 0
