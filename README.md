@@ -17,7 +17,7 @@ root are organized by infrastructure responsibility:
 4. If AWS resources were created by an earlier run without remote state, import those resources into this backend before applying. A fresh remote state does not know about resources created by a previous GitHub Actions runner.
 5. The GitHub Actions workflow validates and plans changes on pushes to `main` and manual runs. After reviewing the plan and reconciling state, set the repository variable `TF_APPLY_ENABLED` to `true` to allow apply runs from `main`; otherwise, apply is skipped. The workflow uses the hub account role `arn:aws:iam::647132523867:role/github-actions-test-role`.
 6. Provide `transit_gateway_id` and `ram_resource_share_arn` from `terraform output` to the spoke root.
-7. The current spoke attachment ID (`tgw-attach-04c1efd2c8bd3085b`) is configured as the default for `spoke_attachment_id` in `terraform/variables.tf`. Apply the hub Terraform root to associate that attachment with the hub TGW route table and add the `10.1.0.0/16` route. Update the value if the spoke attachment is replaced; the ID can also be set in `terraform.tfvars` or supplied as `TF_VAR_spoke_attachment_id`.
+7. After the spoke applies and returns `spoke_transit_gateway_attachment_id`, manually associate the attachment with the hub TGW route table in the AWS Console and add a static `10.1.0.0/16` route targeting that attachment. Also ensure the hub VPC subnet route tables route the spoke CIDR to the TGW.
 8. To create or remove the Phase 5 hub instance independently, manually run
    **Phase 5 - Hub EC2** from Actions on `main`; see `phase5-ec2/README.md`.
 

@@ -54,9 +54,9 @@ variable "spoke_vpc_cidr" {
 }
 
 variable "spoke_attachment_id" {
-  description = "Spoke TGW attachment ID to associate with the hub route table"
+  description = "Spoke TGW attachment ID; set after the spoke creates its attachment"
   type        = string
-  default     = "tgw-attach-04c1efd2c8bd3085b"
+  default     = ""
 }
 
 variable "allow_external_ram_principals" {
