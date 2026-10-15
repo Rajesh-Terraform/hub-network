@@ -8,4 +8,6 @@ subnets = {
     cidr_block = "10.1.1.0/24"
     az         = "ap-south-1b"
   }
-}  
+}
+
+spoke_attachment_id = "tgw-attach-04c1efd2c8bd3085b"

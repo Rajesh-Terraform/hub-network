@@ -16,7 +16,7 @@ variable "hub_vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
-variable "subnets" {  
+variable "subnets" {
   description = "Hub subnet definitions keyed by a stable subnet name"
   type = map(object({
     cidr_block        = string
@@ -54,9 +54,9 @@ variable "spoke_vpc_cidr" {
 }
 
 variable "spoke_attachment_id" {
-  description = "Spoke TGW attachment ID; set after the spoke creates its attachment"
+  description = "Spoke TGW attachment ID to associate with the hub route table"
   type        = string
-  default     = ""
+  default     = "tgw-attach-04c1efd2c8bd3085b"
 }
 
 variable "allow_external_ram_principals" {
